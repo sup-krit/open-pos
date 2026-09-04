@@ -51,7 +51,7 @@ class Order(Base):
         String, nullable=False, default="new_order"
     )  # "new_order" | "shipped"
 
-    payment_method: Mapped[str] = mapped_column(String, nullable=False)  # qr | card
+    payment_method: Mapped[str | None] = mapped_column(String, nullable=True)  # qr | card
     payment_status: Mapped[str] = mapped_column(
         String, nullable=False, default="unpaid"
     )  # unpaid | paid | deposit
