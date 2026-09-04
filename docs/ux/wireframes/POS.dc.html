@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Work Sans', system-ui, sans-serif; background: #FAF7F2; color: #241F1A; }
+    .screen { width: 390px; display: flex; flex-direction: column; }
+    .topbar { height: 56px; flex: 0 0 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #E4DCD1; background: #FFFFFF; }
+    .topbar h1 { font-size: 18px; font-weight: 600; margin: 0; font-family: 'Newsreader', Georgia, serif; }
+    .tag { font-size: 10px; color: #8A7F72; border: 1px solid #E4DCD1; border-radius: 4px; padding: 2px 6px; }
+    .pad { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    .search-input { height: 46px; border: 1px solid #E4DCD1; border-radius: 8px; padding: 0 14px; font-size: 14px; color: #8A7F72; background: #FFFFFF; display: flex; align-items: center; }
+    .quickrow { display: flex; gap: 10px; overflow: hidden; }
+    .quickcard { flex: 0 0 110px; border: 1px solid #E4DCD1; border-radius: 8px; padding: 10px; background: #FFFFFF; display: flex; flex-direction: column; gap: 6px; }
+    .quickcard .name { font-size: 12px; font-weight: 500; }
+    .quickcard .price { font-size: 12px; color: #8A7F72; }
+    .add-btn { align-self: flex-end; width: 26px; height: 26px; border-radius: 6px; background: #C2542E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; }
+    .section-title { font-size: 13px; font-weight: 600; margin: 0 0 8px; }
+    .card { background: #FFFFFF; border: 1px solid #E4DCD1; border-radius: 8px; padding: 14px; }
+    .cart-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E4DCD1; gap: 10px; }
+    .cart-row:last-child { border-bottom: none; }
+    .cart-row .item-name { font-size: 14px; font-weight: 500; }
+    .cart-row .item-price { font-size: 11px; color: #8A7F72; }
+    .stepper { display: flex; align-items: center; gap: 8px; }
+    .stepper button { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #E4DCD1; background: #FFFFFF; font-size: 14px; }
+    .line-total { font-size: 14px; font-weight: 500; width: 56px; text-align: right; }
+    .promo-strip { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .badge { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 4px; border: 1px solid #C2542E; color: #C2542E; font-size: 11px; }
+    .btn-secondary { height: 32px; padding: 0 12px; border-radius: 6px; border: 1px solid #241F1A; font-size: 12px; display: flex; align-items: center; }
+    .selector-row { display: flex; gap: 10px; }
+    .selector { flex: 1; border: 1px solid #E4DCD1; border-radius: 8px; padding: 10px 12px; background: #FFFFFF; display: flex; flex-direction: column; gap: 2px; }
+    .selector .label { font-size: 10px; color: #8A7F72; }
+    .selector .value { font-size: 13px; font-weight: 500; }
+    .pill-toggle { display: flex; border: 1px solid #E4DCD1; border-radius: 8px; overflow: hidden; flex: 1; }
+    .pill { flex: 1; text-align: center; padding: 12px 0; font-size: 13px; }
+    .pill.active { background: #C2542E; color: #FFFFFF; font-weight: 500; }
+    .totals-line { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+    .totals-line.net { font-size: 16px; font-weight: 700; padding-top: 8px; border-top: 1px solid #E4DCD1; margin-top: 4px; }
+    .bottom-bar { position: sticky; bottom: 0; background: #FFFFFF; border-top: 1px solid #E4DCD1; padding: 12px 16px; }
+    .confirm-btn { width: 100%; height: 50px; border-radius: 8px; background: #C2542E; color: #FFFFFF; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+    .caption { font-size: 10px; color: #8A7F72; font-style: italic; padding: 0 16px; }
+  </style>
+</helmet>
+<div class="screen">
+  <div class="topbar">
+    <h1>Sell</h1>
+    <span class="tag">e-receipt</span>
+  </div>
+
+  <div class="pad">
+    <div class="search-input">ค้นหาชื่อสินค้า หรือ SKU</div>
+
+    <div>
+      <span class="section-title">Results</span>
+      <div class="quickrow">
+        <div class="quickcard"><span class="name">Round-cut pendant</span><span class="price">฿890</span><span class="add-btn">+</span></div>
+        <div class="quickcard"><span class="name">Studded hoop earrings</span><span class="price">฿420</span><span class="add-btn">+</span></div>
+        <div class="quickcard"><span class="name">Layered chain bracelet</span><span class="price">฿650</span><span class="add-btn">+</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="section-title">Cart</span>
+      <div class="cart-row">
+        <div><div class="item-name">Round-cut pendant</div><div class="item-price">฿890 / unit</div></div>
+        <div class="stepper"><button>−</button><span>1</span><button>+</button></div>
+        <div class="line-total">฿890</div>
+      </div>
+      <div class="cart-row">
+        <div><div class="item-name">Studded hoop earrings</div><div class="item-price">฿420 / unit</div></div>
+        <div class="stepper"><button>−</button><span>2</span><button>+</button></div>
+        <div class="line-total">฿840</div>
+      </div>
+      <div class="cart-row">
+        <div><div class="item-name">Layered chain bracelet</div><div class="item-price">฿650 / unit</div></div>
+        <div class="stepper"><button>−</button><span>1</span><button>+</button></div>
+        <div class="line-total">฿650</div>
+      </div>
+    </div>
+
+    <div class="promo-strip">
+      <span class="badge">Auto: 10% off applied</span>
+      <span class="btn-secondary">Select promotion</span>
+    </div>
+
+    <div class="selector-row">
+      <div class="selector"><span class="label">Shipping type</span><span class="value">Normal — ฿45 ▾</span></div>
+    </div>
+    <div class="selector-row">
+      <div class="pill-toggle">
+        <div class="pill active">QR</div>
+        <div class="pill">Card</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="totals-line"><span>Subtotal</span><span>฿2,380</span></div>
+      <div class="totals-line"><span>Discount</span><span>−฿238</span></div>
+      <div class="totals-line"><span>Shipping</span><span>฿45</span></div>
+      <div class="totals-line net"><span>Net total</span><span>฿2,187</span></div>
+    </div>
+  </div>
+
+  <span class="caption">iOS PWA has limited offline support — this flow assumes connectivity.</span>
+
+  <div class="bottom-bar">
+    <div class="confirm-btn">ยืนยันการขาย</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

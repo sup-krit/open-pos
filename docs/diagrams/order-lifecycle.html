@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Lifecycle · Open POS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #eb6c36;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    .frame { max-width: 1100px; width: 100%; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">State machine · Open POS</p>
+    <h1>Order lifecycle</h1>
+
+    <svg viewBox="0 0 1000 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="order-lifecycle-title order-lifecycle-desc">
+      <title id="order-lifecycle-title">Order status lifecycle</title>
+      <desc id="order-lifecycle-desc">State machine showing an order created as New Order and automatically moving to Shipped only when a tracking number is entered, with payment status and an optional non-blocking customer notification noted as sublabels rather than separate states.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- ============ TRANSITIONS (drawn first, behind nodes) ============ -->
+
+      <!-- Start dot -> New Order -->
+      <line x1="88" y1="260" x2="140" y2="260" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- New Order -> Shipped (coral, the only status-changing transition) -->
+      <line x1="340" y1="260" x2="560" y2="260" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+
+      <!-- ============ TRANSITION LABELS ============ -->
+
+      <rect x="92" y="240" width="48" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="116" y="250" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SUBMIT</text>
+
+      <rect x="370" y="240" width="160" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="450" y="250" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">AUTO [tracking_number set]</text>
+
+      <!-- ============ STATES ============ -->
+
+      <!-- Start dot -->
+      <circle cx="80" cy="260" r="6" fill="#2d3142"/>
+
+      <!-- State: New Order -->
+      <rect x="140" y="200" width="200" height="120" rx="8" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="148" y="208" width="44" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="170" y="217" fill="#2d3142" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STATE</text>
+      <text x="240" y="256" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">New Order</text>
+      <text x="240" y="276" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">payment: unpaid / awaiting</text>
+      <text x="240" y="292" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">created via Add Order form</text>
+
+      <!-- State: Shipped (focal coral — happy completion of this lifecycle) -->
+      <rect x="560" y="200" width="200" height="120" rx="8" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <rect x="568" y="208" width="44" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.50)" stroke-width="0.8"/>
+      <text x="590" y="217" fill="#eb6c36" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STATE</text>
+      <text x="660" y="256" fill="#2d3142" font-size="14" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Shipped</text>
+      <text x="660" y="276" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">payment: paid (or deposit)</text>
+      <text x="660" y="292" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">on enter → notify (optional)</text>
+
+      <!-- ============ ANNOTATION CALLOUTS (max 2) ============ -->
+
+      <!-- Callout 1: this is the ONLY status-changing transition -->
+      <text x="620" y="76" fill="#2d3142" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="end">the only status change —</text>
+      <text x="620" y="96" fill="#2d3142" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="end">no manual override exists</text>
+      <path d="M 560 104 Q 500 160, 452 238" fill="none" stroke="rgba(45,49,66,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+      <circle cx="452" cy="238" r="2" fill="#2d3142"/>
+
+      <!-- Callout 2: notification hook never blocks the transition -->
+      <text x="960" y="404" fill="#2d3142" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="end">Instagram DM w/ preview —</text>
+      <text x="960" y="424" fill="#2d3142" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="end">no 24h window or no history?</text>
+      <text x="960" y="444" fill="#2d3142" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="end">staff gets copy-message instead</text>
+      <path d="M 880 412 Q 760 380, 664 328" fill="none" stroke="rgba(235,108,54,0.50)" stroke-width="1" stroke-dasharray="4,3"/>
+      <circle cx="664" cy="328" r="2" fill="#2d3142"/>
+
+      <!-- ============ LEGEND ============ -->
+      <line x1="40" y1="560" x2="960" y2="560" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="40" y="576" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+      <circle cx="52" cy="596" r="6" fill="#2d3142"/>
+      <text x="72" y="600" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Initial state</text>
+
+      <rect x="204" y="590" width="24" height="12" rx="4" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="236" y="600" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">State</text>
+
+      <line x1="332" y1="596" x2="360" y2="596" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <text x="368" y="600" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Guarded auto transition</text>
+
+      <line x1="612" y1="596" x2="640" y2="596" stroke="rgba(45,49,66,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="648" y="600" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Editorial note</text>
+    </svg>
+  </div>
+</body>
+</html>

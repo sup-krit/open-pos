@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank statement reconciliation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #eb6c36;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    .frame { max-width: 1200px; width: 100%; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Flowchart · Open POS</p>
+    <h1>Bank statement reconciliation</h1>
+
+    <svg viewBox="0 0 1000 920" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bank-reconciliation-title bank-reconciliation-desc">
+      <title id="bank-reconciliation-title">Bank statement reconciliation</title>
+      <desc id="bank-reconciliation-desc">Flowchart showing a staff-uploaded PDF bank statement parsed into ledger rows that default to needs-review status, with staff manually reviewing and marking each row matched — no automatic matching against orders — before a monthly summary is computed.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- =================================================================
+           ARROWS — drawn first, behind nodes
+           ================================================================= -->
+      <!-- A1 Start → Parse -->
+      <line x1="500" y1="88"  x2="500" y2="120" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- A2 Parse → Category -->
+      <line x1="500" y1="176" x2="500" y2="208" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- A3 Category → Status -->
+      <line x1="500" y1="256" x2="500" y2="288" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- A4 Status → Ledger -->
+      <line x1="500" y1="336" x2="500" y2="368" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- A5 Ledger → Decision -->
+      <line x1="500" y1="416" x2="500" y2="440" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- A6 Decision → Matched (YES, coral happy path) -->
+      <line x1="500" y1="536" x2="500" y2="568" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <!-- A7 Decision → Ledger (NOT YET, rounded orthogonal loop-back) -->
+      <path d="M 600 488 L 692 488 Q 700 488 700 480 L 700 400 Q 700 392 692 392 L 580 392"
+            fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- A8 Matched → Summary -->
+      <line x1="500" y1="616" x2="500" y2="648" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- A9 Summary → End -->
+      <line x1="500" y1="704" x2="500" y2="736" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- Arrow labels -->
+      <rect x="484" y="546" width="32" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="500" y="555" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">YES</text>
+
+      <rect x="708" y="434" width="56" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="736" y="443" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.10em">NOT YET</text>
+
+      <!-- =================================================================
+           NODES
+           ================================================================= -->
+      <!-- N1 Start (oval) -->
+      <rect x="420" y="40" width="160" height="48" rx="24" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="500" y="64" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Upload statement</text>
+      <text x="500" y="78" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">PDF · staff-initiated</text>
+
+      <!-- N2 Parse (rect) -->
+      <rect x="420" y="120" width="160" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="146" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Parse PDF into rows</text>
+      <text x="500" y="162" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">date · debit/credit · balance</text>
+
+      <!-- N3 Category (rect) -->
+      <rect x="420" y="208" width="160" height="48" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="232" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Assign category</text>
+      <text x="500" y="246" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">manual or rule-based</text>
+
+      <!-- N4 Status (rect) -->
+      <rect x="420" y="288" width="160" height="48" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="312" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Set status</text>
+      <text x="500" y="326" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">needs review · default</text>
+
+      <!-- N5 Ledger (rect) -->
+      <rect x="420" y="368" width="160" height="48" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="392" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Ledger table</text>
+      <text x="500" y="406" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">rows appear here</text>
+
+      <!-- N6 Decision (diamond) -->
+      <polygon points="500,440 600,488 500,536 400,488" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="484" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Staff reviewed &amp;</text>
+      <text x="500" y="498" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">marked matched?</text>
+
+      <!-- N7 Matched (rect, coral focal) -->
+      <rect x="420" y="568" width="160" height="48" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="500" y="592" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Matched</text>
+      <text x="500" y="606" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">reconciled</text>
+
+      <!-- N8 Summary (rect) -->
+      <rect x="420" y="648" width="160" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="674" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Monthly summary</text>
+      <text x="500" y="690" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">income · expense · profit</text>
+
+      <!-- N9 End (oval) -->
+      <rect x="420" y="736" width="160" height="48" rx="24" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="500" y="760" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Summary displayed</text>
+      <text x="500" y="774" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">selected period</text>
+
+      <!-- =================================================================
+           LEGEND
+           ================================================================= -->
+      <line x1="40" y1="824" x2="960" y2="824" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="40" y="840" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND · SHAPE CARRIES TYPE</text>
+
+      <rect x="40" y="856" width="24" height="12" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="72" y="866" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Start / end (oval)</text>
+
+      <rect x="220" y="856" width="24" height="12" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="252" y="866" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Step (rectangle)</text>
+
+      <polygon points="412,862 424,856 436,862 424,868" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="448" y="866" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Decision (diamond)</text>
+
+      <line x1="604" y1="864" x2="632" y2="864" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <text x="640" y="866" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Happy path</text>
+
+      <line x1="768" y1="864" x2="796" y2="864" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <text x="804" y="866" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Branch / loop-back</text>
+    </svg>
+  </div>
+</body>
+</html>

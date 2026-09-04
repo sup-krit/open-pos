@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promotion evaluation at checkout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #eb6c36;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    .frame { max-width: 1200px; width: 100%; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Flowchart · Open POS</p>
+    <h1>Promotion evaluation at checkout</h1>
+
+    <svg viewBox="0 0 1000 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="promotion-evaluation-title promotion-evaluation-desc">
+      <title id="promotion-evaluation-title">Promotion evaluation at checkout</title>
+      <desc id="promotion-evaluation-desc">Flowchart showing how the POS discount engine gathers active promotions, checks coupon and condition guards, resolves manual-versus-auto-apply and stacking-versus-priority, applies the discount, and may auto-issue a reward coupon for the customer's next order.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- ===== Arrows (drawn first, behind nodes) ===== -->
+
+      <!-- Start -> Gather -->
+      <line x1="500" y1="88" x2="500" y2="120" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- Gather -> Eligibility -->
+      <line x1="500" y1="176" x2="500" y2="208" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- Eligibility -> Excluded (right, NOT MET) -->
+      <line x1="600" y1="256" x2="740" y2="256" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <rect x="638" y="236" width="64" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="670" y="245" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">NOT MET</text>
+
+      <!-- Eligibility -> Selection (down, ELIGIBLE) -->
+      <line x1="500" y1="304" x2="500" y2="336" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <rect x="508" y="314" width="56" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="536" y="323" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">ELIGIBLE</text>
+
+      <!-- Selection -> Apply, right exit (STACKABLE), rounded elbow, fan attach point -->
+      <path d="M 600 384 L 660 384 Q 668 384 668 392 L 668 488 Q 668 496 660 496 L 540 496 Q 532 496 532 504" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <rect x="598" y="364" width="64" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="630" y="373" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">STACKABLE</text>
+
+      <!-- Selection -> Apply, left exit (NOT STACKABLE), rounded elbow, fan attach point -->
+      <path d="M 400 384 L 340 384 Q 332 384 332 392 L 332 488 Q 332 496 340 496 L 460 496 Q 468 496 468 504" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <rect x="322" y="364" width="96" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="370" y="373" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.02em">NOT STACKABLE</text>
+
+      <!-- Apply -> Reward check -->
+      <line x1="500" y1="568" x2="500" y2="600" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- Reward check -> Reward coupon (right, >= THRESHOLD) -->
+      <line x1="600" y1="648" x2="740" y2="648" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <rect x="628" y="628" width="80" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="668" y="637" fill="#eb6c36" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.02em">&#8805; THRESHOLD</text>
+
+      <!-- Reward check -> End (down, CONTINUE) -->
+      <line x1="500" y1="696" x2="500" y2="728" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <rect x="508" y="706" width="64" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="540" y="715" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.04em">CONTINUE</text>
+
+      <!-- ===== Nodes ===== -->
+
+      <!-- Start oval -->
+      <rect x="420" y="40" width="160" height="48" rx="24" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="500" y="68" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Cart built</text>
+
+      <!-- Gather active promotions -->
+      <rect x="380" y="120" width="240" height="56" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="144" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Gather active promotions</text>
+      <text x="500" y="160" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">status=active · in date window</text>
+
+      <!-- Eligibility diamond -->
+      <polygon points="500,208 600,256 500,304 400,256" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="248" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Coupon &amp;</text>
+      <text x="500" y="262" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">condition met?</text>
+      <text x="500" y="276" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">coupon valid · min qty/amt/variant</text>
+
+      <!-- Excluded terminal -->
+      <rect x="740" y="232" width="200" height="48" rx="24" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="840" y="254" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Excluded from cart</text>
+      <text x="840" y="268" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">not auto-applied</text>
+
+      <!-- Selection & stacking diamond -->
+      <polygon points="500,336 600,384 500,432 400,384" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="376" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Selection &amp;</text>
+      <text x="500" y="390" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">stacking?</text>
+      <text x="500" y="404" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">manual + auto-apply picks</text>
+
+      <!-- Apply discount -->
+      <rect x="400" y="504" width="200" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="532" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Apply discount</text>
+      <text x="500" y="548" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">percent · fixed · BOGO</text>
+      <text x="500" y="560" fill="#7a8399" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">get% 100 = free item</text>
+
+      <!-- Reward-threshold diamond -->
+      <polygon points="500,600 600,648 500,696 400,648" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="500" y="644" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">net_total &#8805;</text>
+      <text x="500" y="658" fill="#2d3142" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">reward threshold?</text>
+
+      <!-- Reward coupon (focal output) -->
+      <rect x="740" y="624" width="220" height="48" rx="24" fill="#f5f5f5"/>
+      <rect x="740" y="624" width="220" height="48" rx="24" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="850" y="644" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Issue reward coupon</text>
+      <text x="850" y="658" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">new code · valid next order</text>
+
+      <!-- End oval -->
+      <rect x="420" y="728" width="160" height="48" rx="24" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="500" y="750" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Final net total</text>
+      <text x="500" y="764" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">order complete</text>
+
+      <!-- ===== Legend ===== -->
+      <line x1="40" y1="820" x2="960" y2="820" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="40" y="836" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+      <rect x="40" y="852" width="24" height="12" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.30)" stroke-width="1"/>
+      <text x="72" y="862" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Start / end / excluded</text>
+
+      <rect x="260" y="852" width="24" height="12" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="292" y="862" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Step</text>
+
+      <polygon points="432,858 444,852 456,858 444,864" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="468" y="862" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Decision</text>
+
+      <line x1="604" y1="858" x2="632" y2="858" stroke="#eb6c36" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <text x="640" y="862" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Reward-eligible path</text>
+
+      <rect x="820" y="852" width="24" height="12" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="852" y="862" fill="#4f5d75" font-size="8.5" font-family="'Geist', sans-serif">Output (new coupon)</text>
+    </svg>
+  </div>
+</body>
+</html>
