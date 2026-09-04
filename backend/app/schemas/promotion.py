@@ -62,7 +62,20 @@ class PromotionUpdate(BaseModel):
 
 
 class PromotionRead(PromotionBase):
+    """
+    Overrides condition_type/discount_type/min_value/start_date as nullable:
+    the DB allows NULL on all four (see supabase/migrations/0001_init.sql),
+    used by reward-coupon template rows that carry no normal condition of
+    their own. PromotionBase keeps them required for PromotionCreate, where
+    a normally-created promotion should always specify them.
+    """
+
     model_config = ConfigDict(from_attributes=True)
+
+    condition_type: str | None = None
+    discount_type: str | None = None
+    min_value: float | None = None
+    start_date: date | None = None
 
     id: uuid.UUID
     status: str

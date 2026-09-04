@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict
 
 class CustomerBase(BaseModel):
     name: str
-    phone: str
+    phone: str | None = None
     social_handle: str | None = None
     tag: str | None = None
     pdpa_consent: bool = False

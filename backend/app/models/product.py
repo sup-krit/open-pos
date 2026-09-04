@@ -18,9 +18,9 @@ class Product(Base):
     )
     sku: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    group_name: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    group_name: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
     variant_attribute: Mapped[str | None] = mapped_column(String, nullable=True)
-    lot: Mapped[str] = mapped_column(String, nullable=False)
+    lot: Mapped[str | None] = mapped_column(String, nullable=True)
 
     cost_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
     price_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
@@ -38,7 +38,7 @@ class Product(Base):
     # field the service layer derives and writes.
     status: Mapped[str] = mapped_column(String, nullable=False, default="in_stock")
 
-    vendor: Mapped[str] = mapped_column(String, nullable=False)
+    vendor: Mapped[str | None] = mapped_column(String, nullable=True)
     custom_fields: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
 
     created_at: Mapped[datetime] = mapped_column(

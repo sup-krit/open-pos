@@ -31,11 +31,13 @@ class Promotion(Base):
 
     status: Mapped[str] = mapped_column(String, nullable=False, default="inactive")  # active|inactive
 
-    condition_type: Mapped[str] = mapped_column(String, nullable=False)  # qty|amount|variant
-    discount_type: Mapped[str] = mapped_column(String, nullable=False)  # percent|fixed|bogo
-    min_value: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False, default=0)
+    # Nullable: reward-coupon template rows (is_reward_coupon=True) carry no
+    # normal condition of their own — see PromotionRead's docstring.
+    condition_type: Mapped[str | None] = mapped_column(String, nullable=True)  # qty|amount|variant
+    discount_type: Mapped[str | None] = mapped_column(String, nullable=True)  # percent|fixed|bogo
+    min_value: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True, default=0)
 
-    start_date: Mapped[date] = mapped_column(Date, nullable=False)
+    start_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
 
     priority: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
