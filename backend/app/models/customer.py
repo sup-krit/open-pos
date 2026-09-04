@@ -21,7 +21,7 @@ class Customer(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     name: Mapped[str] = mapped_column(String, nullable=False)
-    phone: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    phone: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
     social_handle: Mapped[str | None] = mapped_column(String, nullable=True)
     tag: Mapped[str | None] = mapped_column(String, nullable=True)  # e.g. "VIP"
     pdpa_consent: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)

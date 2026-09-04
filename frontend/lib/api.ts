@@ -109,10 +109,57 @@ export type Promotion = {
   auto_apply: boolean;
 };
 
+export type Customer = {
+  id: string;
+  name: string;
+  phone: string;
+  social_handle: string | null;
+  tag: string | null;
+  pdpa_consent: boolean;
+  address_subdistrict: string | null;
+  address_district: string | null;
+  address_province: string | null;
+  total_orders: number;
+  total_spent_minor: number;
+};
+
+export type OrderUpdate = {
+  tracking_number?: string | null;
+  payment_status?: "unpaid" | "paid" | "deposit";
+};
+
 // --- Calls -------------------------------------------------------------
 
 export function listProducts(): Promise<Product[]> {
   return request<Product[]>("/api/products");
+}
+
+export function listCustomers(): Promise<Customer[]> {
+  return request<Customer[]>("/api/customers");
+}
+
+export function listOrders(params?: {
+  shipping_status?: string;
+  payment_status?: string;
+  channel?: string;
+}): Promise<Order[]> {
+  const qs = new URLSearchParams();
+  if (params?.shipping_status) qs.set("shipping_status", params.shipping_status);
+  if (params?.payment_status) qs.set("payment_status", params.payment_status);
+  if (params?.channel) qs.set("channel", params.channel);
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  return request<Order[]>(`/api/orders${suffix}`);
+}
+
+export function getOrder(id: string): Promise<Order> {
+  return request<Order>(`/api/orders/${id}`);
+}
+
+export function updateOrder(id: string, body: OrderUpdate): Promise<Order> {
+  return request<Order>(`/api/orders/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
 }
 
 export function evaluatePromotions(body: {

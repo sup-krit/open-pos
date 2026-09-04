@@ -21,13 +21,13 @@ class AccountingTransaction(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     date: Mapped[date_] = mapped_column(Date, nullable=False)
-    description: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str | None] = mapped_column(String, nullable=True)
 
     debit_minor: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     credit_minor: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     balance_minor: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
 
-    category: Mapped[str] = mapped_column(String, nullable=False)
+    category: Mapped[str | None] = mapped_column(String, nullable=True)
     reconciliation_status: Mapped[str] = mapped_column(
         String, nullable=False, default="needs_review"
     )  # needs_review | matched

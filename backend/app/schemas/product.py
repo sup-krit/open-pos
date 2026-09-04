@@ -9,12 +9,12 @@ from pydantic import BaseModel, ConfigDict, Field
 class ProductBase(BaseModel):
     sku: str
     name: str
-    group_name: str
+    group_name: str | None = None
     variant_attribute: str | None = None
-    lot: str
+    lot: str | None = None
     cost_minor: int = Field(ge=0, description="Cost in integer minor units (e.g. satang).")
     price_minor: int = Field(ge=0, description="Price in integer minor units (e.g. satang).")
-    vendor: str
+    vendor: str | None = None
     custom_fields: dict = Field(default_factory=dict)
 
 

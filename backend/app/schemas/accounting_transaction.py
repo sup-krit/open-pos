@@ -8,11 +8,11 @@ from pydantic import BaseModel, ConfigDict
 
 class AccountingTransactionBase(BaseModel):
     date: date
-    description: str
+    description: str | None = None
     debit_minor: int = 0
     credit_minor: int = 0
     balance_minor: int = 0
-    category: str
+    category: str | None = None
 
 
 class AccountingTransactionCreate(AccountingTransactionBase):

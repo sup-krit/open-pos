@@ -139,7 +139,8 @@ async def apply_promotions(
     candidates: list[Promotion] = [
         p
         for p in result.scalars().all()
-        if p.start_date <= today and (p.end_date is None or today <= p.end_date)
+        if (p.start_date is None or p.start_date <= today)
+        and (p.end_date is None or today <= p.end_date)
     ]
 
     # --- Step 2: coupon gating -------------------------------------------
