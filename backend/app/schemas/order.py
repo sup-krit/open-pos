@@ -52,7 +52,7 @@ class OrderRead(BaseModel):
     promotion_id: uuid.UUID | None
     shipping_type: str
     shipping_status: str
-    payment_method: str
+    payment_method: str | None
     payment_status: str
     tracking_number: str | None
     checkout_token: str | None
