@@ -37,6 +37,7 @@ export default function NewOrderPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [createdOrder, setCreatedOrder] = useState<Order | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     Promise.all([listCustomers(), listProducts()])
@@ -112,6 +113,10 @@ export default function NewOrderPage() {
   }
 
   if (createdOrder) {
+    const checkoutLink = createdOrder.checkout_token
+      ? `${window.location.origin}/checkout/${createdOrder.checkout_token}`
+      : null;
+
     return (
       <>
         <Topbar title="Order created" />
@@ -124,11 +129,37 @@ export default function NewOrderPage() {
               Net total: {formatMinor(createdOrder.net_total_minor)}
             </span>
           </Card>
-          <div className="text-xs text-muted italic border border-border rounded-md p-3">
-            Customer address-entry link and payment QR generation aren&apos;t implemented on the
-            backend yet (no checkout-token issuance on order creation) — this order was created
-            without one. See <code>docs/progress-log.md</code>.
-          </div>
+          {checkoutLink ? (
+            <Card className="p-5 flex flex-col gap-2">
+              <span className="text-sm font-semibold">Checkout link</span>
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  value={checkoutLink}
+                  className="h-9 flex-1 rounded-md border border-border px-3 text-sm text-ink bg-paper"
+                />
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(checkoutLink);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1500);
+                  }}
+                >
+                  {copied ? "Copied" : "Copy"}
+                </Button>
+              </div>
+              <span className="text-xs text-muted italic">
+                Payment QR generation isn&apos;t implemented yet.
+              </span>
+            </Card>
+          ) : (
+            <div className="text-xs text-muted italic border border-border rounded-md p-3">
+              Customer address-entry link and payment QR generation aren&apos;t implemented on the
+              backend yet (no checkout-token issuance on order creation) — this order was created
+              without one. See <code>docs/progress-log.md</code>.
+            </div>
+          )}
           <div className="flex gap-3">
             <Link href={`/orders/${createdOrder.id}`}>
               <Button>View order</Button>

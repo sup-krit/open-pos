@@ -128,6 +128,34 @@ export type OrderUpdate = {
   payment_status?: "unpaid" | "paid" | "deposit";
 };
 
+export type CheckoutOrderSummary = {
+  order_id: string;
+  net_total_minor: number;
+  shipping_type: string;
+  payment_method: string;
+  payment_status: string;
+};
+
+export type CheckoutCustomerSummary = {
+  name: string | null;
+  phone: string | null;
+};
+
+export type CheckoutRead = {
+  order: CheckoutOrderSummary;
+  customer: CheckoutCustomerSummary;
+  token_expires_at: string | null;
+};
+
+export type CheckoutAddressSubmit = {
+  name: string;
+  phone: string;
+  social_handle?: string | null;
+  address_subdistrict?: string | null;
+  address_district?: string | null;
+  address_province?: string | null;
+};
+
 // --- Calls -------------------------------------------------------------
 
 export function listProducts(): Promise<Product[]> {
@@ -179,6 +207,20 @@ export function listPromotions(): Promise<Promotion[]> {
 
 export function createOrder(body: OrderCreate): Promise<Order> {
   return request<Order>("/api/orders", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function getCheckout(token: string): Promise<CheckoutRead> {
+  return request<CheckoutRead>(`/checkout/${token}`);
+}
+
+export function submitCheckoutAddress(
+  token: string,
+  body: CheckoutAddressSubmit
+): Promise<{ ok: boolean; order_id: string }> {
+  return request(`/checkout/${token}/address`, {
     method: "POST",
     body: JSON.stringify(body),
   });
