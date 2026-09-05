@@ -12,8 +12,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.db.session import get_db
+from app.models.coupon_redemption import CouponRedemption
 from app.models.order import Order
 from app.models.order_line_item import OrderLineItem
+from app.models.promotion import Promotion
 from app.schemas.order import OrderCreate, OrderRead, OrderUpdate
 from app.services import orders as orders_service
 from app.services.promotions import CartItem, apply_promotions
@@ -113,6 +115,25 @@ async def create_order(payload: OrderCreate, db: AsyncSession = Depends(get_db))
     db.add(order)
     await db.commit()
     await db.refresh(order, attribute_names=["line_items"])
+
+    # Coupon redemption bookkeeping — see services/promotions.py step 7.
+    # Covers every coupon-gated applied promotion (stacking may apply more
+    # than one), not just the promotion recorded on order.promotion_id.
+    coupon_applied = [ap for ap in promo_result.applied_promotions if ap.coupon_code is not None]
+    if coupon_applied:
+        for applied in coupon_applied:
+            promo = await db.get(Promotion, applied.promotion_id)
+            if promo is not None:
+                promo.coupon_redemption_count += 1
+            db.add(
+                CouponRedemption(
+                    promotion_id=applied.promotion_id,
+                    customer_id=payload.customer_id,
+                    order_id=order.id,
+                )
+            )
+        await db.commit()
+
     return order
 
 

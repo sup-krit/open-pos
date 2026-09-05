@@ -11,7 +11,7 @@ Living task list. History/journal lives in `docs/progress-log.md` — check it f
 - [x] **Checkout link flow** — token issued on order creation (7-day expiry), `app/checkout/[token]/page.tsx` wired live, copyable link on `/orders/new` success screen. Payment QR still placeholder (no PromptPay merchant config exists).
 - [ ] **Promotion engine** (`backend/app/services/promotions.py`):
   - [ ] BOGO buy/get discount math (currently returns ฿0)
-  - [ ] Per-customer coupon redemption limit
+  - [x] Per-customer coupon redemption limit — `coupon_redemptions` history table (`0003_coupon_redemptions.sql`), enforced in `coupon_ok()`; guest orders (no customer) only subject to the total limit
   - [ ] Reward-coupon auto-issuance on threshold
 - [ ] **Stock decrement on sale** — not implemented; needs stock-quantity column (schema currently only has `status` enum) for `status` to auto-derive instead of always defaulting to `in_stock`
 - [x] **Auth** — `get_current_user`/`require_role` verify real Supabase JWTs (HS256 + JWKS/ES256), login screen at `/login`, route guards on all back-office pages + POS, Promotions/Accounting nav+routes gated to `owner_admin`. Staff accounts provisioned manually via Supabase Studio (set `app_metadata.role`).
