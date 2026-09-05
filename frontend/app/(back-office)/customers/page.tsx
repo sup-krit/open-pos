@@ -1,69 +1,58 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Topbar from "@/components/shell/Topbar";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import FilterPill from "@/components/ui/Select";
 import { Table, Td, Th } from "@/components/ui/Table";
 import { useRequireAuth } from "@/lib/auth";
+import { formatMinor, listCustomers, listOrders, type Customer, type Order } from "@/lib/api";
 
-// Sample data — static placeholders for the scaffold.
-const customers = [
-  {
-    name: "Nichakan T.",
-    phone: "081-234-5678",
-    instagram: "@nichakan.t",
-    tag: "VIP",
-    orders: 14,
-    spent: "฿48,200",
-    consent: true,
-  },
-  {
-    name: "Ploy S.",
-    phone: "082-345-6789",
-    instagram: "@ploy.sirichai",
-    tag: null,
-    orders: 2,
-    spent: "฿1,540",
-    consent: true,
-  },
-  {
-    name: "Anan K.",
-    phone: "089-456-7890",
-    instagram: null,
-    tag: null,
-    orders: 1,
-    spent: "฿1,640",
-    consent: true,
-  },
-  {
-    name: "Warunee P.",
-    phone: "061-567-8901",
-    instagram: "@warunee.p",
-    tag: "VIP",
-    orders: 9,
-    spent: "฿32,900",
-    consent: true,
-  },
-  {
-    name: "Kittipong R.",
-    phone: "092-678-9012",
-    instagram: null,
-    tag: null,
-    orders: 1,
-    spent: "฿650",
-    consent: false,
-  },
-];
-
-const recentOrders = [
-  { id: "OP-1042", total: "฿3,520", date: "03 ก.ย." },
-  { id: "OP-0998", total: "฿1,890", date: "21 ส.ค." },
-  { id: "OP-0951", total: "฿2,410", date: "05 ส.ค." },
-];
+function formatAddress(c: Customer): string {
+  const parts = [
+    c.address_subdistrict ? `ต.${c.address_subdistrict}` : null,
+    c.address_district ? `อ.${c.address_district}` : null,
+    c.address_province ? `จ.${c.address_province}` : null,
+  ].filter(Boolean);
+  return parts.length > 0 ? parts.join(" ") : "No address on file";
+}
 
 export default function CustomersPage() {
   const { ready } = useRequireAuth();
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [vipOnly, setVipOnly] = useState(false);
+  const [selected, setSelected] = useState<Customer | null>(null);
+
+  useEffect(() => {
+    listCustomers()
+      .then(setCustomers)
+      .catch((err) => setLoadError(String(err)));
+    listOrders()
+      .then(setOrders)
+      .catch(() => setOrders([]));
+  }, []);
+
+  const filteredCustomers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return customers.filter((c) => {
+      if (vipOnly && c.tag !== "VIP") return false;
+      if (!q) return true;
+      return c.name.toLowerCase().includes(q) || (c.phone ?? "").toLowerCase().includes(q);
+    });
+  }, [customers, search, vipOnly]);
+
+  const recentOrders = useMemo(() => {
+    if (!selected) return [];
+    return orders
+      .filter((o) => o.customer_id === selected.id)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 5);
+  }, [orders, selected]);
+
   if (!ready) return null;
 
   return (
@@ -71,11 +60,22 @@ export default function CustomersPage() {
       <Topbar title="Customers" />
       <div className="p-8 flex flex-col gap-6">
         <div className="flex gap-2.5">
-          <span className="inline-flex items-center h-9 px-3 rounded-md border border-border bg-surface text-xs text-muted w-[260px]">
-            Search name or phone
-          </span>
-          <FilterPill>VIP only ▾</FilterPill>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name or phone"
+            className="inline-flex items-center h-9 px-3 rounded-md border border-border bg-surface text-xs text-ink placeholder:text-muted w-[260px]"
+          />
+          <FilterPill active={vipOnly} onClick={() => setVipOnly((v) => !v)}>
+            VIP only ▾
+          </FilterPill>
         </div>
+
+        {loadError && (
+          <div className="text-xs text-accent border border-accent rounded-lg px-3 py-2 w-fit">
+            Couldn&apos;t load customers: {loadError}
+          </div>
+        )}
 
         <Card className="pt-2 px-5 pb-5">
           <Table>
@@ -83,7 +83,7 @@ export default function CustomersPage() {
               <tr>
                 <Th>Name</Th>
                 <Th>Phone</Th>
-                <Th>Instagram</Th>
+                <Th>Social</Th>
                 <Th>Tag</Th>
                 <Th>Orders</Th>
                 <Th>Total spent</Th>
@@ -91,17 +91,28 @@ export default function CustomersPage() {
               </tr>
             </thead>
             <tbody>
-              {customers.map((c) => (
-                <tr key={c.phone}>
+              {filteredCustomers.map((c) => (
+                <tr
+                  key={c.id}
+                  onClick={() => setSelected(c)}
+                  className="cursor-pointer hover:bg-surface"
+                >
                   <Td>{c.name}</Td>
                   <Td>{c.phone}</Td>
-                  <Td className={c.instagram ? "" : "text-muted"}>{c.instagram ?? "—"}</Td>
+                  <Td className={c.social_handle ? "" : "text-muted"}>{c.social_handle ?? "—"}</Td>
                   <Td>{c.tag ? <Badge tone="accent">{c.tag}</Badge> : <span className="text-muted">—</span>}</Td>
-                  <Td>{c.orders}</Td>
-                  <Td>{c.spent}</Td>
-                  <Td className="text-muted">{c.consent ? "✓" : "–"}</Td>
+                  <Td>{c.total_orders}</Td>
+                  <Td>{formatMinor(c.total_spent_minor)}</Td>
+                  <Td className="text-muted">{c.pdpa_consent ? "✓" : "–"}</Td>
                 </tr>
               ))}
+              {filteredCustomers.length === 0 && !loadError && (
+                <tr>
+                  <Td colSpan={7} className="text-muted italic text-center py-6">
+                    No customers match these filters.
+                  </Td>
+                </tr>
+              )}
             </tbody>
           </Table>
         </Card>
@@ -112,24 +123,39 @@ export default function CustomersPage() {
         <Card className="p-5 flex flex-row gap-8">
           <div className="flex-1 flex flex-col gap-2.5">
             <span className="text-sm font-semibold mb-1">
-              Customer detail (example) — Nichakan T.
+              {selected ? `Customer detail — ${selected.name}` : "Customer detail"}
             </span>
-            <div className="flex flex-col gap-1 text-sm">
-              <span className="text-[11px] text-muted">Phone</span>
-              <span>081-234-5678</span>
-            </div>
-            <div className="flex flex-col gap-1 text-sm">
-              <span className="text-[11px] text-muted">Address</span>
-              <span>124/8 ต.บางนา อ.บางนา จ.กรุงเทพมหานคร</span>
-            </div>
+            {selected ? (
+              <>
+                <div className="flex flex-col gap-1 text-sm">
+                  <span className="text-[11px] text-muted">Phone</span>
+                  <span>{selected.phone}</span>
+                </div>
+                <div className="flex flex-col gap-1 text-sm">
+                  <span className="text-[11px] text-muted">Address</span>
+                  <span>{formatAddress(selected)}</span>
+                </div>
+              </>
+            ) : (
+              <span className="text-sm text-muted italic">Select a customer to see details</span>
+            )}
           </div>
           <div className="flex-1 flex flex-col gap-2.5">
             <span className="text-sm font-semibold mb-1">Recent orders</span>
-            {recentOrders.map((o) => (
-              <span key={o.id} className="text-sm">
-                {o.id} — {o.total} — {o.date}
-              </span>
-            ))}
+            {selected ? (
+              recentOrders.length > 0 ? (
+                recentOrders.map((o) => (
+                  <span key={o.id} className="text-sm">
+                    {o.id.slice(0, 8).toUpperCase()} — {formatMinor(o.net_total_minor)} —{" "}
+                    {new Date(o.created_at).toLocaleDateString("th-TH")}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm text-muted italic">No orders yet</span>
+              )
+            ) : (
+              <span className="text-sm text-muted italic">Select a customer to see details</span>
+            )}
           </div>
         </Card>
       </div>
