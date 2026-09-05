@@ -12,6 +12,7 @@ dependencies = [
     "pydantic-settings>=2.1.0",
     "python-dotenv>=1.0.0",
     "python-multipart>=0.0.9",
+    "pyjwt[crypto]>=2.8.0",
 ]
 
 [build-system]

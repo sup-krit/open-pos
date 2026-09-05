@@ -31,6 +31,11 @@ SUPABASE_SERVICE_ROLE_KEY
     access bypassing RLS — required for verifying JWTs / admin auth
     operations server-side. Never expose this to the frontend.
 
+SUPABASE_JWT_SECRET
+    HS256 shared secret used to verify Supabase-issued JWTs (see
+    core/security.py). For the local Supabase CLI this is printed by
+    `npx supabase status`.
+
 FRONTEND_ORIGIN
     Origin (scheme + host [+ port]) of the deployed frontend, used to
     configure CORS in app/main.py, e.g. https://app.example.com or
@@ -60,6 +65,7 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = ""
     SUPABASE_ANON_KEY: str = ""
     SUPABASE_SERVICE_ROLE_KEY: str = ""
+    SUPABASE_JWT_SECRET: str = ""
 
     # --- CORS / frontend --------------------------------------------------
     FRONTEND_ORIGIN: str = "http://localhost:5173"

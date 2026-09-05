@@ -1,15 +1,25 @@
 // Thin fetch client for the FastAPI backend. Base URL comes from
 // NEXT_PUBLIC_API_URL (see .env.local / repo-root .env.example).
+import { supabase } from "@/lib/supabase";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(init?.headers as Record<string, string> | undefined),
+  };
+  if (session) {
+    headers.Authorization = `Bearer ${session.access_token}`;
+  }
+
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
+    headers,
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Badge from "@/components/ui/Badge";
+import { useRequireAuth } from "@/lib/auth";
 import {
   createOrder,
   evaluatePromotions,
@@ -24,6 +25,7 @@ const SHIPPING_OPTIONS = [
 ];
 
 export default function PosPage() {
+  const { ready } = useRequireAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -128,6 +130,8 @@ export default function PosPage() {
     setConfirmedOrder(null);
     setQuery("");
   }
+
+  if (!ready) return null;
 
   if (confirmedOrder) {
     return <Receipt order={confirmedOrder} onNewSale={newSale} />;

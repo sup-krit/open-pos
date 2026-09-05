@@ -14,10 +14,10 @@ Living task list. History/journal lives in `docs/progress-log.md` — check it f
   - [ ] Per-customer coupon redemption limit
   - [ ] Reward-coupon auto-issuance on threshold
 - [ ] **Stock decrement on sale** — not implemented; needs stock-quantity column (schema currently only has `status` enum) for `status` to auto-derive instead of always defaulting to `in_stock`
-- [ ] **Auth** — `get_current_user`/`require_role` are stubs; no login screen on frontend. Needed before owner/admin-gated routes (promotions activation, accounting) mean anything
+- [x] **Auth** — `get_current_user`/`require_role` verify real Supabase JWTs (HS256 + JWKS/ES256), login screen at `/login`, route guards on all back-office pages + POS, Promotions/Accounting nav+routes gated to `owner_admin`. Staff accounts provisioned manually via Supabase Studio (set `app_metadata.role`).
 
 ## Polish
 
 - [ ] Back-office pages still static/unwired: Inventory inline-edit, Customers, Promotions form, Accounting upload
 - [ ] Dashboard real charts (currently static numbers) — use `dataviz` skill
-- [ ] `customers` list endpoint: `total_spent_minor` comes back as `Decimal` instead of `int` (harmless Pydantic warning) — cast it in `routers/customers.py`
+- [x] `customers` list endpoint: `total_spent_minor` comes back as `Decimal` instead of `int` (harmless Pydantic warning) — cast it in `routers/customers.py`

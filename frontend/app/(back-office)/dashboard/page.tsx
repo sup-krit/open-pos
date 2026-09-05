@@ -1,7 +1,10 @@
+"use client";
+
 import Topbar from "@/components/shell/Topbar";
 import Card from "@/components/ui/Card";
 import { Table, Td, Th } from "@/components/ui/Table";
 import FilterPill from "@/components/ui/Select";
+import { useRequireAuth } from "@/lib/auth";
 
 // Sample data — static placeholders for the scaffold. Wire up to the FastAPI
 // backend once that API surface exists.
@@ -18,6 +21,9 @@ const promoPerformance = [
 ];
 
 export default function DashboardPage() {
+  const { ready } = useRequireAuth();
+  if (!ready) return null;
+
   return (
     <>
       <Topbar

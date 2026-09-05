@@ -1,7 +1,10 @@
+"use client";
+
 import Topbar from "@/components/shell/Topbar";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
+import { useRequireRole } from "@/lib/auth";
 
 // Sample data — static placeholders for the scaffold.
 const promotions = [
@@ -41,6 +44,9 @@ function Chip({ children }: { children: string }) {
 }
 
 export default function PromotionsPage() {
+  const { ready } = useRequireRole("owner_admin");
+  if (!ready) return null;
+
   return (
     <>
       <Topbar title="Promotions" actions={<Button size="lg">+ Create promotion</Button>} />

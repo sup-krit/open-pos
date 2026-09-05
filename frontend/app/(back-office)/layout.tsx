@@ -1,7 +1,14 @@
+"use client";
+
 import type { ReactNode } from "react";
 import Sidebar from "@/components/shell/Sidebar";
+import { useRequireAuth } from "@/lib/auth";
 
 export default function BackOfficeLayout({ children }: { children: ReactNode }) {
+  const { ready } = useRequireAuth();
+
+  if (!ready) return null;
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />

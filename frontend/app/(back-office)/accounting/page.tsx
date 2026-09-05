@@ -1,9 +1,12 @@
+"use client";
+
 import Topbar from "@/components/shell/Topbar";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import FilterPill from "@/components/ui/Select";
 import { Table, Td, Th } from "@/components/ui/Table";
+import { useRequireRole } from "@/lib/auth";
 
 // Sample data — static placeholders for the scaffold.
 const transactions = [
@@ -64,6 +67,9 @@ const transactions = [
 ];
 
 export default function AccountingPage() {
+  const { ready } = useRequireRole("owner_admin");
+  if (!ready) return null;
+
   return (
     <>
       <Topbar

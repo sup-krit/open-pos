@@ -1,8 +1,11 @@
+"use client";
+
 import Topbar from "@/components/shell/Topbar";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import FilterPill from "@/components/ui/Select";
 import { Table, Td, Th } from "@/components/ui/Table";
+import { useRequireAuth } from "@/lib/auth";
 
 // Sample data — static placeholders for the scaffold.
 const customers = [
@@ -60,6 +63,9 @@ const recentOrders = [
 ];
 
 export default function CustomersPage() {
+  const { ready } = useRequireAuth();
+  if (!ready) return null;
+
   return (
     <>
       <Topbar title="Customers" />

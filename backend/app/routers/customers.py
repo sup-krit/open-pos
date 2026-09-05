@@ -33,7 +33,7 @@ def _to_read(row) -> CustomerRead:
     customer, total_orders, total_spent_minor = row
     data = CustomerRead.model_validate(customer)
     return data.model_copy(
-        update={"total_orders": total_orders, "total_spent_minor": total_spent_minor}
+        update={"total_orders": total_orders, "total_spent_minor": int(total_spent_minor)}
     )
 
 
