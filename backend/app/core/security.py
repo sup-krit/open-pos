@@ -3,25 +3,26 @@ Auth extension points.
 
 Staff authentication is provided by Supabase Auth on the frontend; the
 backend's job is to verify the bearer token Supabase issues and resolve it
-to a staff user + role. That verification is NOT implemented yet — both
-dependencies below are stubs so routers can already be wired up against the
-final shape of the dependency graph.
-
-TODO (real implementation):
-    - Extract the `Authorization: Bearer <jwt>` header.
-    - Verify the JWT signature against Supabase's JWKS (or verify via the
-      Supabase service-role client), checking `exp`/`aud`/`iss`.
-    - Look up / hydrate a local `StaffUser` (id, email, role) from the
-      token's `sub` claim.
-    - Raise HTTP 401 for missing/invalid/expired tokens.
+to a staff user + role.
 """
 
 from dataclasses import dataclass
+from functools import lru_cache
 
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from app.core.config import settings
+
 bearer_scheme = HTTPBearer(auto_error=False)
+
+
+@lru_cache
+def _get_jwks_client() -> jwt.PyJWKClient:
+    """Lazily build (and memoize) the JWKS client on first use, so importing
+    this module doesn't fail when SUPABASE_URL isn't set yet (e.g. no .env)."""
+    return jwt.PyJWKClient(f"{settings.SUPABASE_URL}/auth/v1/.well-known/jwks.json")
 
 
 @dataclass
@@ -36,42 +37,53 @@ class CurrentUser:
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ) -> CurrentUser:
-    """
-    Dependency stub for resolving the current authenticated staff user.
-
-    TODO: Replace this placeholder with real Supabase JWT verification.
-    For now this either:
-      - returns a placeholder "staff" user so downstream routers/tests can
-        run end-to-end without a real auth flow, or
-      - raises 401 if no bearer token was supplied at all.
-
-    Real implementation should verify `credentials.credentials` as a
-    Supabase-issued JWT and raise HTTPException(401) on failure.
-    """
+    """Dependency resolving the current authenticated staff user from a Supabase JWT."""
     if credentials is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated (Supabase JWT verification not yet implemented).",
+            detail="Not authenticated",
         )
 
-    # TODO: verify credentials.credentials against Supabase JWKS / auth API.
-    return CurrentUser(id="00000000-0000-0000-0000-000000000000", email="staff@example.com", role="staff")
+    try:
+        # Local Supabase CLI defaults to asymmetric (ES256) JWKS-based signing;
+        # some hosted projects still use the legacy shared HS256 secret. Branch
+        # on the token header so both are supported.
+        if jwt.get_unverified_header(credentials.credentials).get("alg") == "HS256":
+            claims = jwt.decode(
+                credentials.credentials,
+                settings.SUPABASE_JWT_SECRET,
+                algorithms=["HS256"],
+                audience="authenticated",
+            )
+        else:
+            signing_key = _get_jwks_client().get_signing_key_from_jwt(credentials.credentials)
+            claims = jwt.decode(
+                credentials.credentials,
+                signing_key.key,
+                algorithms=["ES256", "RS256"],
+                audience="authenticated",
+            )
+    except jwt.PyJWTError:  # includes PyJWKClientError (JWKS fetch/lookup failures)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+        )
+
+    # Default to least-privilege "staff" when the role claim is absent.
+    return CurrentUser(
+        id=claims["sub"],
+        email=claims.get("email", ""),
+        role=(claims.get("app_metadata") or {}).get("role", "staff"),
+    )
 
 
 def require_role(role: str):
-    """
-    Dependency factory stub for role-gated routes (e.g. owner/admin-only
-    endpoints such as promotion activation and accounting).
-
-    TODO: Once get_current_user does real JWT verification, compare
-    `current_user.role` against `role` (and/or a role hierarchy) and raise
-    HTTPException(403) when it doesn't satisfy the requirement.
-    """
+    """Dependency factory for role-gated routes (e.g. owner/admin-only endpoints)."""
 
     async def _require_role(current_user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
-        # TODO: real role check, e.g.:
-        # if current_user.role != role and current_user.role != "owner_admin":
-        #     raise HTTPException(status_code=403, detail="Insufficient role")
+        # owner_admin satisfies any role requirement.
+        if current_user.role != "owner_admin" and current_user.role != role:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient role")
         return current_user
 
     return _require_role

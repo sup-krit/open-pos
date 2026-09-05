@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ComponentType, SVGProps } from "react";
+import { useCurrentRole } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import {
   AccountingIcon,
   CustomersIcon,
@@ -17,6 +19,7 @@ type NavItem = {
   href: string;
   label: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
+  ownerOnly?: boolean;
 };
 
 const NAV_ITEMS: NavItem[] = [
@@ -25,12 +28,20 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/orders", label: "Orders", icon: OrdersIcon },
   { href: "/inventory", label: "Inventory", icon: InventoryIcon },
   { href: "/customers", label: "Customers", icon: CustomersIcon },
-  { href: "/promotions", label: "Promotions", icon: PromotionsIcon },
-  { href: "/accounting", label: "Accounting", icon: AccountingIcon },
+  { href: "/promotions", label: "Promotions", icon: PromotionsIcon, ownerOnly: true },
+  { href: "/accounting", label: "Accounting", icon: AccountingIcon, ownerOnly: true },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const role = useCurrentRole();
+  const visibleItems = NAV_ITEMS.filter((item) => !item.ownerOnly || role === "owner_admin");
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.replace("/login");
+  }
 
   return (
     <aside className="w-[220px] shrink-0 bg-surface border-r border-border flex flex-col py-5 gap-0.5">
@@ -38,7 +49,7 @@ export default function Sidebar() {
         Open POS
       </div>
       <nav className="flex flex-col gap-0.5">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {visibleItems.map(({ href, label, icon: Icon }) => {
           const active =
             href === "/dashboard" ? pathname === href : pathname?.startsWith(href);
           return (
@@ -57,6 +68,13 @@ export default function Sidebar() {
           );
         })}
       </nav>
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="mt-auto mx-5 h-9 rounded-md border border-border text-[13px] font-medium text-ink hover:bg-paper"
+      >
+        Logout
+      </button>
     </aside>
   );
 }

@@ -1,9 +1,12 @@
+"use client";
+
 import Topbar from "@/components/shell/Topbar";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import FilterPill from "@/components/ui/Select";
 import { Table, Td, Th } from "@/components/ui/Table";
+import { useRequireAuth } from "@/lib/auth";
 
 // Sample data — static placeholders for the scaffold.
 const products = [
@@ -68,6 +71,9 @@ const lockedTh = "bg-locked-tint";
 const lockedTd = "bg-locked-tint";
 
 export default function InventoryPage() {
+  const { ready } = useRequireAuth();
+  if (!ready) return null;
+
   return (
     <>
       <Topbar
