@@ -40,6 +40,8 @@ export type Product = {
   lot: string | null;
   cost_minor: number;
   price_minor: number;
+  stock_quantity: number;
+  low_stock_threshold: number;
   margin_pct: number;
   profit_minor: number;
   status: "in_stock" | "low_stock" | "out_of_stock";
@@ -188,6 +190,32 @@ export type PromotionUpdateInput = {
   coupon_valid_until?: string | null;
 };
 
+export type ProductCreateInput = {
+  sku: string;
+  name: string;
+  group_name?: string | null;
+  variant_attribute?: string | null;
+  lot?: string | null;
+  vendor?: string | null;
+  cost_minor: number;
+  price_minor: number;
+  stock_quantity?: number;
+  low_stock_threshold?: number;
+};
+
+export type ProductUpdateInput = {
+  sku?: string;
+  name?: string;
+  group_name?: string | null;
+  variant_attribute?: string | null;
+  lot?: string | null;
+  vendor?: string | null;
+  cost_minor?: number;
+  price_minor?: number;
+  stock_quantity?: number;
+  low_stock_threshold?: number;
+};
+
 export type Customer = {
   id: string;
   name: string;
@@ -237,8 +265,33 @@ export type CheckoutAddressSubmit = {
 
 // --- Calls -------------------------------------------------------------
 
-export function listProducts(): Promise<Product[]> {
-  return request<Product[]>("/api/products");
+export function listProducts(params?: {
+  group_name?: string;
+  variant_attribute?: string;
+  status?: string;
+  vendor?: string;
+}): Promise<Product[]> {
+  const qs = new URLSearchParams();
+  if (params?.group_name) qs.set("group_name", params.group_name);
+  if (params?.variant_attribute) qs.set("variant_attribute", params.variant_attribute);
+  if (params?.status) qs.set("status", params.status);
+  if (params?.vendor) qs.set("vendor", params.vendor);
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  return request<Product[]>(`/api/products${suffix}`);
+}
+
+export function createProduct(body: ProductCreateInput): Promise<Product> {
+  return request<Product>("/api/products", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateProduct(id: string, body: ProductUpdateInput): Promise<Product> {
+  return request<Product>(`/api/products/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
 }
 
 export function listCustomers(): Promise<Customer[]> {
