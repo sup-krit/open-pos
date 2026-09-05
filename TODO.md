@@ -20,6 +20,7 @@ Living task list. History/journal lives in `docs/progress-log.md` — check it f
 
 - [x] Promotions form — real list/create/edit/status-toggle wired to backend, BOGO + coupon fields conditional, live preview computed from form state
 - [x] Customers page — real list/search/VIP-filter, row-click detail panel with real address + recent orders (client-filtered from orders list)
-- [ ] Back-office pages still static/unwired: Inventory inline-edit, Accounting upload
+- [x] Inventory inline-edit — real list, server-side Group/Variant/Status/Vendor filters, double-click inline-edit on Cost/Price/Vendor/Stock qty/Low-stock threshold, "+ Add product" form
+- [ ] Back-office pages still static/unwired: Accounting upload
 - [ ] Dashboard real charts (currently static numbers) — use `dataviz` skill
 - [x] `customers` list endpoint: `total_spent_minor` comes back as `Decimal` instead of `int` (harmless Pydantic warning) — cast it in `routers/customers.py`
