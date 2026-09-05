@@ -89,11 +89,15 @@ async def _channel_breakdown(db: AsyncSession) -> list[ChannelBreakdown]:
 
 
 async def _payment_mix(db: AsyncSession) -> list[PaymentMixEntry]:
-    stmt = select(
-        Order.payment_method,
-        func.count(Order.id).label("order_count"),
-        func.coalesce(func.sum(Order.net_total_minor), 0).label("net_total_minor"),
-    ).group_by(Order.payment_method)
+    stmt = (
+        select(
+            Order.payment_method,
+            func.count(Order.id).label("order_count"),
+            func.coalesce(func.sum(Order.net_total_minor), 0).label("net_total_minor"),
+        )
+        .where(Order.payment_method.is_not(None))
+        .group_by(Order.payment_method)
+    )
     result = await db.execute(stmt)
     return [
         PaymentMixEntry(

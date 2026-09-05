@@ -263,6 +263,68 @@ export type CheckoutAddressSubmit = {
   address_province?: string | null;
 };
 
+export type SalesTrendPoint = {
+  date: string;
+  net_total_minor: number;
+  order_count: number;
+};
+
+export type TopProduct = {
+  product_id: string;
+  name: string;
+  qty_sold: number;
+  revenue_minor: number;
+};
+
+export type CustomerSegment = {
+  segment: string;
+  customer_count: number;
+  total_spent_minor: number;
+};
+
+export type PromotionPerformance = {
+  promotion_id: string;
+  name: string;
+  times_applied: number;
+  total_discount_minor: number;
+};
+
+export type ChannelBreakdown = {
+  channel: string;
+  order_count: number;
+  net_total_minor: number;
+};
+
+export type GeographyBreakdown = {
+  province: string;
+  order_count: number;
+  net_total_minor: number;
+};
+
+export type PaymentMixEntry = {
+  payment_method: string;
+  order_count: number;
+  net_total_minor: number;
+};
+
+export type GrossMarginSummary = {
+  period: string;
+  revenue_minor: number;
+  cost_minor: number;
+  gross_margin_pct: number;
+};
+
+export type DashboardSummary = {
+  sales_trend: SalesTrendPoint[];
+  top_products: TopProduct[];
+  customer_segments: CustomerSegment[];
+  promotion_performance: PromotionPerformance[];
+  channel_breakdown: ChannelBreakdown[];
+  geography: GeographyBreakdown[];
+  payment_mix: PaymentMixEntry[];
+  gross_margin: GrossMarginSummary[];
+};
+
 // --- Calls -------------------------------------------------------------
 
 export function listProducts(params?: {
@@ -374,6 +436,10 @@ export function createOrder(body: OrderCreate): Promise<Order> {
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export function getDashboard(): Promise<DashboardSummary> {
+  return request<DashboardSummary>("/api/dashboard");
 }
 
 export function getCheckout(token: string): Promise<CheckoutRead> {
