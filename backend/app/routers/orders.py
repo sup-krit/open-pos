@@ -14,8 +14,10 @@ from sqlalchemy.orm import selectinload
 from app.db.session import get_db
 from app.models.order import Order
 from app.models.order_line_item import OrderLineItem
+from app.models.product import Product
 from app.schemas.order import OrderCreate, OrderRead, OrderUpdate
 from app.services import orders as orders_service
+from app.services.products import compute_status
 from app.services.promotions import CartItem, apply_promotions
 
 router = APIRouter(tags=["orders"])
@@ -109,6 +111,15 @@ async def create_order(payload: OrderCreate, db: AsyncSession = Depends(get_db))
         )
         for li in payload.line_items
     ]
+
+    # Decrement stock for each line item's product and re-derive its status.
+    # No row locking / concurrency handling — out of scope for this
+    # single-shop, low-concurrency app.
+    for li in payload.line_items:
+        product = await db.get(Product, li.product_id)
+        if product is not None:
+            product.stock_quantity = max(0, product.stock_quantity - li.qty)
+            product.status = compute_status(product.stock_quantity, product.low_stock_threshold)
 
     db.add(order)
     await db.commit()

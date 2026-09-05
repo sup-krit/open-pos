@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, Numeric, String, func
+from sqlalchemy import BigInteger, DateTime, Integer, Numeric, String, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -32,10 +32,11 @@ class Product(Base):
     margin_pct: Mapped[float] = mapped_column(Numeric(7, 4), nullable=False, default=0)
     profit_minor: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
 
-    # Auto-derived from a stock threshold — never set directly by clients.
-    # TODO: wire this to an actual stock-quantity column/table once
-    # inventory-quantity tracking is added; for now it's a plain text
-    # field the service layer derives and writes.
+    stock_quantity: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    low_stock_threshold: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
+
+    # Derived from stock_quantity vs. low_stock_threshold via
+    # app.services.products.compute_status — never set directly by clients.
     status: Mapped[str] = mapped_column(String, nullable=False, default="in_stock")
 
     vendor: Mapped[str | None] = mapped_column(String, nullable=True)
