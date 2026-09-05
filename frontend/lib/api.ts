@@ -114,9 +114,78 @@ export type Promotion = {
   name: string;
   description: string | null;
   status: "active" | "inactive";
-  coupon_code: string | null;
-  manual_selectable: boolean;
+  condition_type: string | null;
+  discount_type: string | null;
+  min_value: number | null;
+  start_date: string | null;
+  end_date: string | null;
+  priority: number;
   auto_apply: boolean;
+  manual_selectable: boolean;
+  stackable: boolean;
+  bogo_buy_qty: number | null;
+  bogo_get_qty: number | null;
+  bogo_get_discount_pct: number | null;
+  coupon_code: string | null;
+  coupon_redemption_limit_total: number | null;
+  coupon_redemption_limit_per_customer: number | null;
+  coupon_redemption_count: number;
+  coupon_valid_from: string | null;
+  coupon_valid_until: string | null;
+  is_reward_coupon: boolean;
+  reward_threshold_amount_minor: number | null;
+  reward_parent_promotion_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PromotionCreateInput = {
+  name: string;
+  description?: string | null;
+  condition_type: string;
+  discount_type: string;
+  min_value?: number;
+  start_date: string;
+  end_date?: string | null;
+  priority?: number;
+  auto_apply?: boolean;
+  manual_selectable?: boolean;
+  stackable?: boolean;
+  bogo_buy_qty?: number | null;
+  bogo_get_qty?: number | null;
+  bogo_get_discount_pct?: number | null;
+  coupon_code?: string | null;
+  coupon_redemption_limit_total?: number | null;
+  coupon_redemption_limit_per_customer?: number | null;
+  coupon_valid_from?: string | null;
+  coupon_valid_until?: string | null;
+  is_reward_coupon?: boolean;
+  reward_threshold_amount_minor?: number | null;
+  reward_parent_promotion_id?: string | null;
+  status?: "active" | "inactive";
+};
+
+export type PromotionUpdateInput = {
+  name?: string;
+  description?: string | null;
+  status?: "active" | "inactive";
+  condition_type?: string;
+  discount_type?: string;
+  min_value?: number;
+  start_date?: string;
+  end_date?: string | null;
+  priority?: number;
+  auto_apply?: boolean;
+  manual_selectable?: boolean;
+  stackable?: boolean;
+  bogo_buy_qty?: number | null;
+  bogo_get_qty?: number | null;
+  bogo_get_discount_pct?: number | null;
+  coupon_code?: string | null;
+  coupon_redemption_limit_total?: number | null;
+  coupon_redemption_limit_per_customer?: number | null;
+  coupon_valid_from?: string | null;
+  coupon_valid_until?: string | null;
 };
 
 export type Customer = {
@@ -213,6 +282,34 @@ export function evaluatePromotions(body: {
 
 export function listPromotions(): Promise<Promotion[]> {
   return request<Promotion[]>("/api/promotions");
+}
+
+export function getPromotion(id: string): Promise<Promotion> {
+  return request<Promotion>(`/api/promotions/${id}`);
+}
+
+export function createPromotion(body: PromotionCreateInput): Promise<Promotion> {
+  return request<Promotion>("/api/promotions", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updatePromotion(id: string, body: PromotionUpdateInput): Promise<Promotion> {
+  return request<Promotion>(`/api/promotions/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function setPromotionStatus(
+  id: string,
+  status: "active" | "inactive"
+): Promise<Promotion> {
+  return request<Promotion>(`/api/promotions/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
 }
 
 export function createOrder(body: OrderCreate): Promise<Order> {

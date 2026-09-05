@@ -103,12 +103,14 @@ async def apply_promotions(
            or for BOGO see below.
          - "fixed": flat `min_value` (in minor units) off the subtotal,
            floored at 0.
-         - "bogo": for every `bogo_buy_qty` units of a qualifying line,
-           discount `bogo_get_qty` units at `bogo_get_discount_pct`
-           percent off their unit price. (TODO: current schema doesn't
-           scope BOGO to a specific product/group — assumed to apply
-           across the whole cart's cheapest eligible units at launch;
-           needs product/group targeting to be fully correct.)
+         - "bogo": for every full cycle of `bogo_buy_qty + bogo_get_qty`
+           units in the cart (`cart_qty // cycle_size`), discount
+           `bogo_get_qty` units per cycle at `bogo_get_discount_pct`
+           percent off their unit price, applied to the cart's cheapest
+           eligible units. (Note: current schema doesn't scope BOGO to a
+           specific product/group — it is assumed to apply across the
+           whole cart's cheapest eligible units; needs product/group
+           targeting to be fully correct.)
        Sum all surviving promotions' discounts into `total_discount_minor`.
     7. TODO: Coupon redemption bookkeeping — on successful order
        completion (not here, but downstream in routers/orders.py),
@@ -125,10 +127,10 @@ async def apply_promotions(
        set `PromotionResult.issued_reward_coupon_code` to it.
 
     Returns a PromotionResult with the promotions actually applied and the
-    aggregate discount. Steps 1-3 (gathering + filtering candidates) and
-    the percent/fixed discount math in step 6 are implemented; BOGO
-    targeting, per-customer coupon limits, and reward-coupon issuance are
-    left as explicit TODOs above and are not yet implemented.
+    aggregate discount. Steps 1-6 (gathering/filtering candidates and the
+    percent/fixed/bogo discount math) are implemented; per-customer coupon
+    limits and reward-coupon issuance (steps 7-8) are left as explicit
+    TODOs above and are not yet implemented.
     """
     now = now or datetime.now(timezone.utc)
     today = now.date()
@@ -215,11 +217,30 @@ async def apply_promotions(
             discount = int((promo.min_value or 0) * 100)  # assume min_value major units
             reason = f"{promo.min_value} fixed off (auto)"
         elif promo.discount_type == "bogo":
-            # TODO: BOGO not scoped to specific product/group — approximate
-            # by applying across whole-cart cheapest eligible units.
-            # Left intentionally simplistic; needs product/group targeting.
-            discount = 0
-            reason = "BOGO (not yet fully implemented)"
+            # BOGO not scoped to a specific product/group by the current
+            # schema — approximate by applying across the whole cart's
+            # cheapest eligible units. Needs product/group targeting to be
+            # fully correct; see docstring step 6.
+            buy_qty = promo.bogo_buy_qty or 0
+            get_qty = promo.bogo_get_qty or 0
+            if buy_qty <= 0 or get_qty <= 0:
+                discount = 0
+            else:
+                cycle_size = buy_qty + get_qty
+                num_cycles = cart_qty // cycle_size
+                discounted_unit_count = num_cycles * get_qty
+                unit_prices = sorted(
+                    item.unit_price_minor for item in cart_items for _ in range(item.qty)
+                )
+                discounted_unit_count = min(discounted_unit_count, len(unit_prices))
+                pct = float(promo.bogo_get_discount_pct or 0)
+                discount = sum(
+                    int(price * (pct / 100)) for price in unit_prices[:discounted_unit_count]
+                )
+            reason = (
+                f"Buy {promo.bogo_buy_qty} get {promo.bogo_get_qty} at "
+                f"{promo.bogo_get_discount_pct}% off (auto)"
+            )
         else:
             reason = "unknown discount_type"
 
