@@ -8,7 +8,7 @@ Living task list. History/journal lives in `docs/progress-log.md` — check it f
 
 ## Features
 
-- [ ] **Checkout link flow** — `app/checkout/[token]/page.tsx` wired to `/checkout/{token}`; generate token + payment QR on order creation from back-office "Add order" flow (acknowledged gap on `/orders/new` success screen)
+- [x] **Checkout link flow** — token issued on order creation (7-day expiry), `app/checkout/[token]/page.tsx` wired live, copyable link on `/orders/new` success screen. Payment QR still placeholder (no PromptPay merchant config exists).
 - [ ] **Promotion engine** (`backend/app/services/promotions.py`):
   - [ ] BOGO buy/get discount math (currently returns ฿0)
   - [ ] Per-customer coupon redemption limit
