@@ -2,8 +2,9 @@
 that auto-derives shipping_status via the service layer.
 """
 
+import secrets
 import uuid
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
@@ -99,6 +100,8 @@ async def create_order(payload: OrderCreate, db: AsyncSession = Depends(get_db))
         shipping_type=payload.shipping_type,
         payment_method=payload.payment_method,
         payment_status=payload.payment_status,
+        checkout_token=secrets.token_urlsafe(24),
+        checkout_token_expires_at=datetime.now(timezone.utc) + timedelta(days=7),
     )
     order.line_items = [
         OrderLineItem(
