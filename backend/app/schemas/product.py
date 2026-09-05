@@ -14,6 +14,8 @@ class ProductBase(BaseModel):
     lot: str | None = None
     cost_minor: int = Field(ge=0, description="Cost in integer minor units (e.g. satang).")
     price_minor: int = Field(ge=0, description="Price in integer minor units (e.g. satang).")
+    stock_quantity: int = Field(ge=0, default=0)
+    low_stock_threshold: int = Field(ge=0, default=5)
     vendor: str | None = None
     custom_fields: dict = Field(default_factory=dict)
 
@@ -32,6 +34,8 @@ class ProductUpdate(BaseModel):
     lot: str | None = None
     cost_minor: int | None = Field(default=None, ge=0)
     price_minor: int | None = Field(default=None, ge=0)
+    stock_quantity: int | None = Field(default=None, ge=0)
+    low_stock_threshold: int | None = Field(default=None, ge=0)
     vendor: str | None = None
     custom_fields: dict | None = None
     # status is intentionally NOT accepted here — it's auto-derived.

@@ -13,7 +13,7 @@ Living task list. History/journal lives in `docs/progress-log.md` — check it f
   - [ ] BOGO buy/get discount math (currently returns ฿0)
   - [x] Per-customer coupon redemption limit — `coupon_redemptions` history table (`0003_coupon_redemptions.sql`), enforced in `coupon_ok()`; guest orders (no customer) only subject to the total limit
   - [ ] Reward-coupon auto-issuance on threshold
-- [ ] **Stock decrement on sale** — not implemented; needs stock-quantity column (schema currently only has `status` enum) for `status` to auto-derive instead of always defaulting to `in_stock`
+- [x] **Stock decrement on sale** — `stock_quantity`/`low_stock_threshold` columns added (`0002_stock_quantity.sql`), order creation decrements stock and re-derives `status` via `services/products.py::compute_status`
 - [x] **Auth** — `get_current_user`/`require_role` verify real Supabase JWTs (HS256 + JWKS/ES256), login screen at `/login`, route guards on all back-office pages + POS, Promotions/Accounting nav+routes gated to `owner_admin`. Staff accounts provisioned manually via Supabase Studio (set `app_metadata.role`).
 
 ## Polish
