@@ -12,9 +12,10 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.coupon_redemption import CouponRedemption
 from app.models.promotion import Promotion
 
 
@@ -37,6 +38,10 @@ class AppliedPromotion:
     name: str
     discount_minor: int
     reason: str  # short human-readable explanation, e.g. "10% off (auto)"
+    # Set to the matched coupon code when this promotion was coupon-gated,
+    # so callers (routers/orders.py) know which applied promotions need a
+    # redemption recorded. None for non-coupon promotions.
+    coupon_code: str | None = None
 
 
 @dataclass
@@ -60,7 +65,7 @@ async def apply_promotions(
     Evaluate all applicable promotions for a cart and compute the total
     discount, applying the project's stacking/priority rules.
 
-    Full algorithm (steps 1-6 are implemented below; 7-8 are TODO):
+    Full algorithm (steps 1-7 are implemented below; 8 is TODO):
 
     1. Gather candidate promotions: `status == "active"` AND today's date
        falls within `[start_date, end_date or infinity]`.
@@ -69,9 +74,11 @@ async def apply_promotions(
          - within `[coupon_valid_from, coupon_valid_until]` (when set),
          - not exhausted (`coupon_redemption_count < coupon_redemption_limit_total`,
            when a total limit is set),
-         - not exhausted per-customer (TODO: requires a redemption-history
-           lookup keyed by customer_id + promotion_id — not implemented
-           yet, see TODO below).
+         - not exhausted per-customer (`coupon_redemption_limit_per_customer`,
+           when set — enforced by counting `coupon_redemptions` rows for
+           this `(promotion_id, customer_id)` pair; a null `customer_id`
+           can't be matched against this limit, so guest orders only ever
+           run into the total limit above).
        Promotions with no coupon_code are open to everyone and always pass
        this filter.
     3. For each remaining candidate, check `condition_type` against the
@@ -110,11 +117,11 @@ async def apply_promotions(
            across the whole cart's cheapest eligible units at launch;
            needs product/group targeting to be fully correct.)
        Sum all surviving promotions' discounts into `total_discount_minor`.
-    7. TODO: Coupon redemption bookkeeping — on successful order
-       completion (not here, but downstream in routers/orders.py),
-       increment `coupon_redemption_count` and record a per-customer
-       redemption row so step 2's per-customer limit check has data to
-       query against.
+    7. Coupon redemption bookkeeping — on successful order completion (not
+       here, but downstream in routers/orders.py), `coupon_redemption_count`
+       is incremented and a `coupon_redemptions` row is recorded per
+       coupon-gated `AppliedPromotion` (see its `coupon_code` field), so
+       step 2's per-customer limit check has data to query against.
     8. TODO: Reward-coupon issuance — after totals are finalized
        (net_total_minor known), check every *active* promotion where
        `is_reward_coupon=False` but has a `reward_threshold_amount_minor`
@@ -125,10 +132,10 @@ async def apply_promotions(
        set `PromotionResult.issued_reward_coupon_code` to it.
 
     Returns a PromotionResult with the promotions actually applied and the
-    aggregate discount. Steps 1-3 (gathering + filtering candidates) and
-    the percent/fixed discount math in step 6 are implemented; BOGO
-    targeting, per-customer coupon limits, and reward-coupon issuance are
-    left as explicit TODOs above and are not yet implemented.
+    aggregate discount. Steps 1-7 (gathering + filtering candidates,
+    percent/fixed discount math, and coupon redemption bookkeeping) are
+    implemented; BOGO targeting and reward-coupon issuance are left as
+    explicit TODOs above and are not yet implemented.
     """
     now = now or datetime.now(timezone.utc)
     today = now.date()
@@ -144,6 +151,29 @@ async def apply_promotions(
     ]
 
     # --- Step 2: coupon gating -------------------------------------------
+    # Batch-fetch per-customer redemption counts up front for every
+    # coupon-gated candidate that carries a per-customer limit, so
+    # coupon_ok() below can stay a plain sync predicate. A null
+    # customer_id can't be matched against a per-customer limit (guest
+    # orders only run into coupon_redemption_limit_total, if set).
+    per_customer_limit_promo_ids = [
+        p.id
+        for p in candidates
+        if p.coupon_code is not None and p.coupon_redemption_limit_per_customer is not None
+    ]
+    redemption_counts: dict[UUID, int] = {}
+    if customer_id is not None and per_customer_limit_promo_ids:
+        redemption_stmt = (
+            select(CouponRedemption.promotion_id, func.count())
+            .where(
+                CouponRedemption.promotion_id.in_(per_customer_limit_promo_ids),
+                CouponRedemption.customer_id == customer_id,
+            )
+            .group_by(CouponRedemption.promotion_id)
+        )
+        redemption_result = await db.execute(redemption_stmt)
+        redemption_counts = dict(redemption_result.all())
+
     def coupon_ok(promo: Promotion) -> bool:
         if promo.coupon_code is None:
             return True
@@ -158,9 +188,12 @@ async def apply_promotions(
             and promo.coupon_redemption_count >= promo.coupon_redemption_limit_total
         ):
             return False
-        # TODO: per-customer redemption limit check requires a redemption
-        # history table keyed by (customer_id, promotion_id) — not
-        # implemented yet. Currently NOT enforced.
+        if (
+            customer_id is not None
+            and promo.coupon_redemption_limit_per_customer is not None
+            and redemption_counts.get(promo.id, 0) >= promo.coupon_redemption_limit_per_customer
+        ):
+            return False
         return True
 
     candidates = [p for p in candidates if coupon_ok(p)]
@@ -231,11 +264,14 @@ async def apply_promotions(
                 name=promo.name,
                 discount_minor=discount,
                 reason=reason,
+                coupon_code=promo.coupon_code,
             )
         )
 
-    # --- Steps 7 & 8: TODO — coupon redemption bookkeeping + reward-coupon
-    # issuance. Not implemented; see docstring above.
+    # --- Step 7: coupon redemption bookkeeping happens downstream, in
+    # routers/orders.py, once the order actually commits (see docstring).
+    # --- Step 8: TODO — reward-coupon issuance. Not implemented; see
+    # docstring above.
     issued_reward_coupon_code = None
 
     return PromotionResult(
