@@ -18,6 +18,7 @@ Living task list. History/journal lives in `docs/progress-log.md` — check it f
 
 ## Polish
 
-- [ ] Back-office pages still static/unwired: Inventory inline-edit, Customers, Promotions form, Accounting upload
+- [x] Customers page — real list/search/VIP-filter, row-click detail panel with real address + recent orders (client-filtered from orders list)
+- [ ] Back-office pages still static/unwired: Inventory inline-edit, Promotions form, Accounting upload
 - [ ] Dashboard real charts (currently static numbers) — use `dataviz` skill
 - [x] `customers` list endpoint: `total_spent_minor` comes back as `Decimal` instead of `int` (harmless Pydantic warning) — cast it in `routers/customers.py`
