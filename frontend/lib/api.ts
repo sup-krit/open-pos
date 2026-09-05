@@ -191,7 +191,7 @@ export type PromotionUpdateInput = {
 export type Customer = {
   id: string;
   name: string;
-  phone: string;
+  phone: string | null;
   social_handle: string | null;
   tag: string | null;
   pdpa_consent: boolean;
@@ -243,6 +243,10 @@ export function listProducts(): Promise<Product[]> {
 
 export function listCustomers(): Promise<Customer[]> {
   return request<Customer[]>("/api/customers");
+}
+
+export function getCustomer(id: string): Promise<Customer> {
+  return request<Customer>(`/api/customers/${id}`);
 }
 
 export function listOrders(params?: {
